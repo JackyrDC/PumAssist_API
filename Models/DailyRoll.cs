@@ -1,17 +1,18 @@
 ﻿using PumAssist_API.Models;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class DailyRoll
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int idDailyRoll { get; set; }
-
-    [ForeignKey("Roll")]
     public int idRoll { get; set; }
+    [ForeignKey("idRoll")]
+    public virtual Roll Roll { get; set; }
 
-    public DateTime creationDate { get; set; }
-
-    public virtual Roll roll { get; set; }
+    public System.DateTime creationDate { get; set; }
 
     public virtual ICollection<PermanentRoll> studentsList { get; set; }
 

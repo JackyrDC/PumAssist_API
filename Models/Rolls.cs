@@ -18,9 +18,9 @@ namespace PumAssist_API.Models
         public virtual Teachers Teacher { get; set; }
 
         [Required]
-        [ForeignKey(nameof(ClassEntity))]
+        [ForeignKey(nameof(Class))]
         public int IdClass { get; set; }
-        public virtual Classes ClassEntity { get; set; }
+        public virtual Classes Class { get; set; }
 
         [Required]
         public DateTime RollDate { get; set; }

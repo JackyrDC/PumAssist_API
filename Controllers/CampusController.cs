@@ -11,35 +11,44 @@ namespace PumAssist_API.Controllers
     {
         private MyAppDbContext db = new MyAppDbContext();
         [HttpGet]
-        public IEnumerable<Models.Campus> Get()
+        public async Task<IEnumerable<Models.Campus>> Get()
         {
-            return db.Campus.ToList();
+            return await db.Campus.ToList();
         }
         [HttpGet]
-        public Models.Campus Get(int id)
+        public async Task<Models.Campus> Get(int id)
         {
-            return db.Campus.Find(id);
+            return await db.Campus.Find(id);
         }
         [HttpPost]
-        public IHttpActionResult Post([FromBody]Models.Campus campus)
+        public async Task<IHttpActionResult> Post([FromBody]Models.Campus campus)
         {
             db.Campus.Add(campus);
-            db.SaveChanges();
+            await db.SaveChanges();
             return Ok();
         }
         [HttpPut]
-        public IHttpActionResult Put([FromBody]Models.Campus campus)
+        public async Task<IHttpActionResult> Put([FromBody]Models.Campus campus)
         {
             db.Entry(campus).State = System.Data.Entity.EntityState.Modified;
-            db.SaveChanges();
+            await db.SaveChanges();
             return Ok();
         }
         [HttpDelete]
-        public IHttpActionResult Delete(int id)
+        public async Task<IHttpActionResult> Delete(int id)
         {
-            db.Campus.Remove(db.Campus.Find(id));
-            db.SaveChanges();
-            return Ok();
+            try
+            {
+                Models.Campus campus = db.Campus.Find(id);
+                campus.IsDeleted = true;
+                db.Entry(campus).State = System.Data.Entity.EntityState.Modified;
+                await db.SaveChanges();
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
 
     }

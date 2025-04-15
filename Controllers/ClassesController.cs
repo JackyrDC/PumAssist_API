@@ -14,47 +14,57 @@ namespace PumAssist_API.Controllers
 
         [HttpGet]
         [Route("api/Classes/Get")]
-        public IEnumerable<Models.Classes> Get()
+        public async Task<IEnumerable<Models.Classes>> Get()
         {
-            return db.Classes.ToList();
+            return await db.Classes.ToList();
         }
 
         [HttpGet]
         [Route("api/Classes/Get/{id}")]
-        public Models.Classes GetbyId(int id)
+        public async Task<Models.Classes> GetbyId(int id)
         {
-          return db.Classes.Find(id);
+          return await db.Classes.Find(id);
         }
 
         [HttpGet]
         [Route("api/Classes/GetByAlumn/{idAlumno}")]
-        public IEnumerable<Models.Classes> GetClassesByAlumn(int idAlumno)
+        public async Task<IEnumerable<Models.Classes>> GetClassesByAlumn(int idAlumno)
         {
-            return db.Classes.Where(c => c.StudentsList.Any(s => s.IdStudent == idAlumno)).ToList();
+            return await db.Classes.Where(c => c.StudentsList.Any(s => s.IdStudent == idAlumno)).ToList();
         }
 
         [HttpPost]
-        public IHttpActionResult Post([FromBody]Models.Classes classes)
+        public async Task<IHttpActionResult> Post([FromBody]Models.Classes classes)
         {
             db.Classes.Add(classes);
-            db.SaveChanges();
+            await db.SaveChanges();
             return Ok();
         }
 
         [HttpPut]
-        public IHttpActionResult Put(int id, [FromBody]Models.Classes classes)
+        public async Task<IHttpActionResult> Put(int id, [FromBody]Models.Classes classes)
         {
             db.Entry(classes).State = System.Data.Entity.EntityState.Modified;
-            db.SaveChanges();
+            await db.SaveChanges();
             return Ok();
         }
 
-        [HttpDelete]
-        public IHttpActionResult Delete(int id)
+        [HttpPut]
+        [Route("api/Classes/Delete/{id}")]
+        public async Task<IHttpActionResult> Delete(int id)
         {
-            db.Classes.Remove(db.Classes.Find(id));
-            db.SaveChanges();
-            return Ok();
+            try
+            {
+                Models.Classes classs = db.Classes.Find(id);
+                classs.IsDeleted = true;
+                db.Entry(classs).State = System.Data.Entity.EntityState.Modified;
+                await db.SaveChanges();
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

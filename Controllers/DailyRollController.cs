@@ -15,27 +15,26 @@ namespace PumAssist_API.Controllers
         private MyAppDbContext db = new MyAppDbContext();
         [Route("/daily/getdaily")]
         [HttpGet]
-        public IEnumerable<Models.DailyRoll> Get()
+        public async Task<IEnumerable<Models.DailyRoll>> Get()
         {
-
-            return db.DailyRolls.ToList();
+            return await db.DailyRolls.ToList();
         }
 
         [HttpGet]
         [Route("/daily/getdaily/{id}")]
-        public Models.DailyRoll Get(int id)
+        public async Task<Models.DailyRoll> Get(int id)
         {
-            return db.DailyRolls.Find(id);
+            return await db.DailyRolls.Find(id);
         }
 
         [HttpPost]
         [Route("/daily/postdaily")]
-        public IHttpActionResult Create()
+        public async Task<IHttpActionResult> Create()
         {
             try
             {
                 Models.DailyRoll dailyRoll = new Models.DailyRoll();
-                dailyRoll.creationDate = DateTime.Now;
+                await dailyRoll.creationDate = DateTime.Now;
                 return Ok();
             }
             catch (Exception ex)
@@ -46,33 +45,33 @@ namespace PumAssist_API.Controllers
 
         [HttpPost]
         [Route("/daily/postmanydaily/")]
-        public IHttpActionResult CreateMany(IEnumerable<Models.DailyRoll> collection)
+        public async Task<IHttpActionResult> CreateMany(IEnumerable<Models.DailyRoll> collection)
         {
-            try
-            {
-                collection.ToList().ForEach(dailyRoll =>
+                await collection.ToList().ForEach(dailyRoll =>
                 {
-                    dailyRoll.creationDate = DateTime.Now;
-                    db.DailyRolls.Add(dailyRoll);
-                });
-                return Ok();
-            }
-            catch
-            {
-                return BadRequest();
-            }
+                    try
+                    {
+                        dailyRoll.creationDate = DateTime.Now;
+                        db.DailyRolls.Add(dailyRoll);
+                        return Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        return badRequest(ex.Message);
+                    }
+                });            
         }
 
         [HttpPut]
         [Route("/daily/putdaily/{id}")]
-        public IHttpActionResult Edit(int id)
+        public async Task<IHttpActionResult> Edit(int id)
         {
             try
             {
                 Models.DailyRoll dailyRoll = db.DailyRolls.Find(id);
                 dailyRoll.creationDate = DateTime.Now;
                 db.Entry(dailyRoll).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
+                await db.SaveChanges();
                 return Ok();
             }
             catch (Exception ex)
@@ -83,11 +82,14 @@ namespace PumAssist_API.Controllers
 
         [Route("/daily/deletedaily/{id}")]
         [HttpPost]
-        public IHttpActionResult Delete(int id)
+        public async Task<IHttpActionResult> Delete(int id)
         {
             try
             {
-                db.DailyRolls.Remove(db.DailyRolls.Find(id));
+                Models.DailyRoll dailyRoll = db.DailyRolls.Find(id);
+                dailyRoll.IsDeleted = true;
+                db.Entry(dailyRoll).State = System.Data.Entity.EntityState.Modified;
+                await db.SaveChanges();
                 return Ok();
             }
             catch

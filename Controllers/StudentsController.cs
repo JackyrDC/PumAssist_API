@@ -13,40 +13,47 @@ namespace PumAssist_API.Controllers
 
         [HttpGet]
         [Route("/api/Students/GET")]
-        public IEnumerable<Models.Students> Get()
+        public async Task<IEnumerable<Models.Students>> Get()
         {
-            return db.Estudiantes.ToList(); 
+            try
+            {
+                return await db.Estudiantes.ToList();
+            }
+            catch {
+                return BadRequest();
+            }
         }
 
         [HttpGet]
         [Route("/api/Students/GET/{id}")]
-        public Models.Students Get(int id)
+        public async Task<Models.Students> Get(int id)
         {
-            return db.Estudiantes.Find(id);
+            return await db.Estudiantes.Find(id);
         }
 
         [HttpPost]
         [Route("/api/Students/POST")]
-        public void Post([FromBody]Models.Students Student)
+        public async Task<IHTTPActionResult> Post([FromBody]Models.Students Student)
         {
             try{
                 db.Estudiantes.Add(Student);
-                db.SaveChanges();
-
+                await db.SaveChanges();
+                return Ok();
             }
             catch {
                 Console.WriteLine("Error en la creación del nuevo estudiante");
+                return BadRequest();
             }
         }
 
         [HttpPost]
         [Route("/api/Students/PostMany")]
-        public IHttpActionResult PostMany([FromBody]Models.Students[] students)
+        public async Task<IHttpActionResult> PostMany([FromBody]Models.Students[] students)
         {
             try
             {
                 db.Estudiantes.AddRange(students);
-                db.SaveChanges();
+                await db.SaveChanges();
                 return Ok();
             }
             catch
@@ -57,20 +64,35 @@ namespace PumAssist_API.Controllers
 
         [HttpPut]
         [Route("/api/Students/PUT/{id}")]
-        public IHttpActionResult Put(int id, [FromBody]Models.Students student)
+        public async Task<IHttpActionResult> Put(int id, [FromBody]Models.Students student)
         {
-            db.Entry(student).State = System.Data.Entity.EntityState.Modified;
-            db.SaveChanges();
-            return Ok();
+            try
+            {
+                db.Entry(student).State = System.Data.Entity.EntityState.Modified;
+                await db.SaveChanges();
+                return Ok();
+            }
+            catch {
+                return BadRequest();
+            }
         }
 
-        [HttpDelete]
+        [HttpPut]
         [Route("/api/Students/DELETE/{id}")]
-        public IHttpActionResult Delete(int id)
+        public async Task<IHttpActionResult> Delete(int id)
         {
-            db.Estudiantes.Remove(db.Estudiantes.Find(id));
-            db.SaveChanges();
-            return Ok();
+            try
+            {
+                Models.Students student = db.Students.Find(id);
+                student.IsDeleted = true;
+                db.Entry(student).State = System.Data.Entity.EntityState.Modified;
+                await db.SaveChanges();
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

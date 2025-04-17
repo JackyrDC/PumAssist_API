@@ -15,7 +15,7 @@ namespace PumAssist_API.Controllers
         private MyAppDbContext db = new MyAppDbContext();
 
         [HttpPost]
-        [Route("/login")]
+        [Route("/api/login")]
         public async Task<IHttpActionResult> Login([FromBody] LoginRequest login)
         {
             if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
@@ -64,9 +64,8 @@ namespace PumAssist_API.Controllers
             return Unauthorized();
         }
 
-
         [HttpPost]
-        [Route("/logout")]
+        [Route("/api/logout")]
         public async Task<IHttpActionResult> Logout([FromBody] LogoutRequest logout)
         {
             if (logout == null || string.IsNullOrEmpty(logout.Email))
@@ -90,6 +89,40 @@ namespace PumAssist_API.Controllers
 
             return NotFound();
         }
+
+        [HttpPost]
+        [Route("/api/signup")]
+        public async Task<IHttpActionResult> SignUp([FromBody] SignUpRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+                return BadRequest("Datos incompletos");
+
+            if (db.Estudiantes.Any(u => u.Email == request.Email && !u.IsDeleted))
+                return BadRequest("Ya existe una cuenta con ese correo.");
+
+            var newStudent = new Students
+            {
+                StudentName = request.Name,
+                StudentLastName = request.LastName,
+                StudentEmail = request.Email,
+                Password = request.Password,
+                StudentPhone = request.Phone,
+                StudentAddress = request.Address,
+                StudentGender = request.Gender,
+                StudentBirthDate = request.BirthDate,
+                StudentPhoto = request.Photo,
+                IdCampus = request.IdCampus,
+                IdUserType = request.IdUserType,
+                IdUserState = 2,
+                StudentActive = true,
+                IsDeleted = false
+            };
+
+            db.Estudiantes.Add(newStudent);
+            await db.SaveChangesAsync();
+
+            return Ok("Registro exitoso");
+        }
     }
 
     public class LoginRequest
@@ -101,6 +134,21 @@ namespace PumAssist_API.Controllers
     public class LogoutRequest
     {
         public string Email { get; set; }
+    }
+
+    public class SignUpRequest
+    {
+        public string Name { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Phone { get; set; }
+        public string Address { get; set; }
+        public string Gender { get; set; }
+        public string BirthDate { get; set; }
+        public string Photo { get; set; }
+        public int IdCampus { get; set; }
+        public int IdUserType { get; set; }
     }
 
 }

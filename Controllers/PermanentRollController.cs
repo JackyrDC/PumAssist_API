@@ -1,8 +1,12 @@
-﻿using System;
+﻿using PumAssist_API.Models;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace PumAssist_API.Controllers
@@ -14,20 +18,25 @@ namespace PumAssist_API.Controllers
         [Route("api/PermanentRoll/Get")]
         public async Task<IEnumerable<Models.PermanentRoll>> Get()
         {
-            return await db.PermanentRoll.ToList();
+            return await db.PermanentRolls.ToListAsync();
         }
 
         [HttpGet]
         [Route("api/PermanentRoll/Get/{id}")]
-        public async Task<Models.PermanentRoll> Get(int id)
+        public async Task<IHttpActionResult> Get(int id)
         {
             try
             {
-                return await db.PermanentRoll.Find(id);
+                var roll = await db.PermanentRolls.FindAsync(id);
+                if (roll == null)
+                {
+                    return NotFound();
+                }
+                return Ok(roll);
             }
             catch
             {
-                return null;
+                return InternalServerError();
             }
         }
 
@@ -37,8 +46,8 @@ namespace PumAssist_API.Controllers
         {
             try
             {
-                db.PermanentRoll.Add(roll);
-                await db.SaveChanges();
+                db.PermanentRolls.Add(roll);
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -49,12 +58,22 @@ namespace PumAssist_API.Controllers
 
         [HttpPut]
         [Route("api/PermanentRoll/Put")]
-        public async Task<IHttpActionResult> Put(int id, [FromBody] string value)
+        public async Task<IHttpActionResult> Put(int id, [FromBody] Models.PermanentRoll roll)
         {
-            db.PermanentRoll.Update(id, value);
+            var existingRoll = await db.PermanentRolls.FindAsync(id);
+            if (existingRoll == null)
+            {
+                return NotFound();
+            }
+
+            existingRoll.idDailyRoll = roll.idDailyRoll;
+            existingRoll.idStudent = roll.idStudent;
+            existingRoll.rollState = roll.rollState;
+            existingRoll.IsDeleted = roll.IsDeleted;
+
             try
             {
-                await db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -67,19 +86,22 @@ namespace PumAssist_API.Controllers
         [Route("/api/PermanentRoll/Delete/{id}")]
         public async Task<IHttpActionResult> Delete(int id)
         {
-            var roll = db.PermanentRoll.Find(id);
+            var roll = await db.PermanentRolls.FindAsync(id);
             try
             {
+                if (roll == null)
+                {
+                    return NotFound();
+                }
                 roll.IsDeleted = true;
-                db.PermanentRoll.State = System.Data.Entity.State.Modified;
-                await db.SaveChanges();
+                db.Entry(roll).State = EntityState.Modified;
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
             {
                 return BadRequest();
             }
-            
         }
     }
 }

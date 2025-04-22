@@ -4,6 +4,9 @@ using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Net.Http;
+using PumAssist_API.Models;
+using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace PumAssist_API.Controllers
 {
@@ -14,7 +17,7 @@ namespace PumAssist_API.Controllers
         [Route("api/teachers/")]
         public async Task<IEnumerable<Models.Teachers>> Get()
         {
-            return await db.Teachers.ToList();
+            return await db.Teachers.ToListAsync();
         }
 
         [HttpGet]
@@ -26,12 +29,12 @@ namespace PumAssist_API.Controllers
 
         [HttpPost]
         [Route("api/teachers/post")]
-        public async Task<IHttpActionResult> Post([FromBody]Models.Teachers teacher)
+        public async Task<IHttpActionResult> Post([FromBody] Models.Teachers teacher)
         {
             try
             {
                 db.Teachers.Add(teacher);
-                await db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -42,11 +45,12 @@ namespace PumAssist_API.Controllers
 
         [HttpPost]
         [Route("api/teachers/createmultiple")]
-        public async Task<IHttpActionResult> CreateMultiple([FromBody]IEnumerable<Models.Teachers> teachers)
+        public async Task<IHttpActionResult> CreateMultiple([FromBody] IEnumerable<Models.Teachers> teachers)
         {
-            try{
+            try
+            {
                 db.Teachers.AddRange(teachers);
-                await db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -61,18 +65,19 @@ namespace PumAssist_API.Controllers
         public async Task<IHttpActionResult> Put(int id)
         {
             var teacher = db.Teachers.Find(id);
-            await db.Entry(teacher).State = System.Data.Entity.EntityState.Modified;
+            db.Entry(teacher).State = System.Data.Entity.EntityState.Modified;
+            await db.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPut]
         [Route("api/teachers/put")]
-        public async Task<IHttpActionResult> Edit(int id, [FromBody]Models.Teachers teacher)
+        public async Task<IHttpActionResult> Edit(int id, [FromBody] Models.Teachers teacher)
         {
             try
             {
                 db.Entry(teacher).State = System.Data.Entity.EntityState.Modified;
-                await db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -90,7 +95,7 @@ namespace PumAssist_API.Controllers
                 Models.Teachers teacher = db.Teachers.Find(id);
                 teacher.IsDeleted = true;
                 db.Entry(teacher).State = System.Data.Entity.EntityState.Modified;
-                await db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Ok();
             }
             catch
@@ -98,7 +103,5 @@ namespace PumAssist_API.Controllers
                 return BadRequest();
             }
         }
-
- 
     }
 }

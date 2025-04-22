@@ -73,7 +73,7 @@ namespace PumAssist_API.Models
 
             modelBuilder.Entity<Roll>()
                 .HasMany(r => r.DailyRolls)
-                .WithRequired(dr => dr.Roll)
+                .WithRequired(dr => dr.roll)
                 .HasForeignKey(dr => dr.idRoll)
                 .WillCascadeOnDelete(false);
 

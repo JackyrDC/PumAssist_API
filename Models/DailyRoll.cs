@@ -5,14 +5,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PumAssist_API.Models
 {
-    [Table("DailyRoll")]
+    [Table("dailyRoll")]
     public class DailyRoll
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int idDailyRoll { get; set; }
 
-        [ForeignKey("Roll")]
+        [ForeignKey("roll")]
         public int idRoll { get; set; }
 
         public System.DateTime creationDate { get; set; }
